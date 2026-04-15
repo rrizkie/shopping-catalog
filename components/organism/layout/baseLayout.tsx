@@ -30,6 +30,10 @@ const BaseLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    const handleClickTitle = () => {
+        push("/")
+    }
+
     const handleWishlistDialog = () => {
         setIsOpenWishlistDialog(val => !val)
     }
@@ -43,7 +47,7 @@ const BaseLayout = ({ children }: { children: React.ReactNode }) => {
             {/** HEADER */}
             <div className="flex justify-between items-center px-4 md:px-8 py-3 min-h-[65px] border border-[#E5E7EB]">
                 <div className="flex flex-row items-center gap-8">
-                    <div className="brandTitle">Shopii</div>
+                    <div className="brandTitle" onClick={handleClickTitle}>Shopii</div>
                     <div className="hidden md:flex flex-row items-center gap-8">
                         {menus.map(menu => (
                             <div key={menu} className={menu === "Home" ? "menu-active" : "menu-inactive"} onClick={() => handleRedirect(menu)}>{menu}</div>
