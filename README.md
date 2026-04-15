@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Shopping Catalog
+
+A simple shopping catalog app built with the Next.js App Router, featuring product listing + detail pages, wishlist, and a persistent cart.
 
 ## Getting Started
 
-First, run the development server:
+### Installation
+
+```bash
+npm install
+```
+
+### Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Technologies used
 
-To learn more about Next.js, take a look at the following resources:
+- **Next.js (App Router)**: UI framework (`next`)
+- **React**: UI library (`react`, `react-dom`)
+- **TypeScript**: static typing
+- **Tailwind CSS**: styling (`tailwindcss`)
+- **Redux Toolkit**: state management (`@reduxjs/toolkit`, `react-redux`)
+- **redux-persist**: persisted client state for `cart` and `wishlist`
+- **TanStack Query**: server-state fetching/caching (`@tanstack/react-query`)
+- **Axios**: HTTP client (`axios`)
+- **React Icons**: icon set (`react-icons`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cart persistence & hydration handling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Persisting Redux state in a Next.js App Router app needs special care to avoid server-side rendering accessing `window`/`localStorage`, and to avoid hydration mismatches.
 
-## Deploy on Vercel
+This project handles that as follows:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Client-only provider**: The root `Provider` component is a client component (`components/organism/provider/index.tsx` has `'use client'`) and is mounted from `app/layout.tsx`. This ensures Redux + persistence setup happens on the client.
+- **Storage fallback on the server**: In `store/index.ts`, storage is selected like this:
+  - On the **client**: `createWebStorage("local")` (uses `localStorage`)
+  - On the **server**: a **noop storage** implementation (`createNoopStorage`) that returns `Promise.resolve(null)` so SSR never touches browser APIs.
+- **Gate rendering until rehydration**: The provider wraps the app with `PersistGate` (`redux-persist/integration/react`). `PersistGate` delays rendering of children until persisted state is rehydrated on the client, which reduces UI flicker and avoids rendering with empty cart data during the initial client hydration.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Files to look at:
+
+- `store/index.ts`: noop storage + `persistReducer` configs for `cart` and `wishlist`
+- `components/organism/provider/index.tsx`: `ReduxProvider` + `PersistGate`
+- `app/layout.tsx`: mounts the provider in the App Router root layout
+
