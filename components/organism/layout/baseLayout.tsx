@@ -4,7 +4,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { CiHeart, CiShoppingCart } from "react-icons/ci";
 import { FaFacebook, FaTwitter, FaYoutube } from "react-icons/fa";
 import { useState } from "react";
-import { AnimatePresence, motion } from 'framer-motion';
 import { useAppSelector } from "@/store";
 import WishlistDialog from "../WishlistDialog";
 
